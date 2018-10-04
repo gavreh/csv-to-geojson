@@ -97,6 +97,18 @@ var tests = [
         source: "?a=10",
         target: "#foo",
         relative: "?a=10#foo"
+    },
+
+    {
+        source: "file:///test.js",
+        target: "file:///test.js",
+        relative: "test.js"
+    },
+
+    {
+        source: "file:///test.js",
+        target: "file:///test/test.js",
+        relative: "test/test.js"
     }
 
 ];
@@ -104,7 +116,7 @@ var tests = [
 describe("relative", function () {
 
     tests.forEach(function (test) {
-        it(
+        (test.focus ? iit : it)(
             test.label || (
                 "from " + JSON.stringify(test.source) + " " +
                 "to " + JSON.stringify(test.target)
