@@ -3,25 +3,40 @@ import './App.css';
 import 'leaflet/dist/leaflet.css';
 import { Map, TileLayer, Marker, Popup } from 'react-leaflet';
 import { LatLngExpression } from 'leaflet';
-import { Container, Row, Col } from 'reactstrap';
+import { Container, Row, Col, FormGroup, Form, Input } from 'reactstrap';
 import CsvInput from './CsvInput';
 
-class App extends Component<{initialLatitude: number, initialLongitude: number, initialZoom: number}, { lat: number, lng: number, zoom: number, csvText: string }> {
+//@ts-ignore
+import * as csv2geojson from 'csv2geojson';
+
+class App extends Component<{initialLatitude: number, initialLongitude: number, initialZoom: number}, { lat: number, lng: number, zoom: number, csvText: string, geoJsonText: string }> {
   constructor(props: any) {
     super(props);
     this.state = {
       lat: this.props.initialLatitude,
       lng: this.props.initialLongitude,
       zoom: this.props.initialZoom,
-      csvText: ''
+      csvText: '',
+      geoJsonText: ''
     };
   }
 
   handleClick(text: string) {
-    console.log('todo - handleClick', text);
     this.setState({
       csvText: text
     });
+
+    // todo - do not assume "lat" "lng" but instead look for the proper column name.
+    csv2geojson.csv2geojson(text, {
+      latfield: 'lat',
+      lonfield: 'lng',
+      delimiter: ','
+    }, (err: any, data: any) => {
+      this.setState({
+        geoJsonText: JSON.stringify(data, null, 2)
+      })
+    });
+    
   }
 
   render() {
@@ -40,6 +55,17 @@ class App extends Component<{initialLatitude: number, initialLongitude: number, 
           <Row>
             <Col>
               <CsvInput onClick={(text: string) => this.handleClick(text)}></CsvInput>
+              <Container>
+                <Row>
+                  <Col>
+                    <Form>
+                      <FormGroup>
+                        <Input type="textarea" placeholder="Result" rows="10" value={this.state.geoJsonText} />
+                      </FormGroup>
+                    </Form>
+                  </Col>
+                </Row>
+              </Container>
             </Col>
             <Col>
               <Map center={position} zoom={this.state.zoom}>
