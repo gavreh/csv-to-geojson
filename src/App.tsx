@@ -21,22 +21,34 @@ class App extends Component<{initialLatitude: number, initialLongitude: number, 
     };
   }
 
+  findInFirstLine(text: string, options: string[]): string|boolean {
+    const firstLine = text.split('\n')[0];
+    let matches = options.filter((option) => {
+      return firstLine.indexOf(option) > -1
+    });
+
+    return matches.length === 0 ? false : matches[0];
+  }
+
   handleClick(text: string) {
     this.setState({
       csvText: text
     });
-
-    // todo - do not assume "lat" "lng" but instead look for the proper column name.
-    csv2geojson.csv2geojson(text, {
-      latfield: 'lat',
-      lonfield: 'lng',
-      delimiter: ','
-    }, (err: any, data: any) => {
-      this.setState({
-        geoJsonText: JSON.stringify(data, null, 2)
-      })
-    });
     
+    const latField = this.findInFirstLine(text, ['lat', 'Lat', 'LAT', 'latitude', 'Latitude', 'LATITUDE']);
+    const lngField = this.findInFirstLine(text, ['lng', 'Lng', 'LNG', 'longitude', 'Longitude', 'LONGITUDE']);
+
+    if(latField !== false && lngField !== false) {
+      csv2geojson.csv2geojson(text, {
+        latfield: latField,
+        lonfield: lngField,
+        delimiter: ','
+      }, (err: any, data: any) => {
+        this.setState({
+          geoJsonText: JSON.stringify(data, null, 2)
+        })
+      });
+    }
   }
 
   render() {

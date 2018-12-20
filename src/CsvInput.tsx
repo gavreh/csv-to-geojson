@@ -11,7 +11,6 @@ class CsvInput extends Component<{onClick: Function}, {value: string}> {
   }
 
   handleClick(): void {
-    console.log('test', this.state.value);
     this.props.onClick(this.state.value);
   }
 
